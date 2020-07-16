@@ -1,0 +1,28 @@
+{
+  "coc":{
+    "preferences": {
+      "useQuickfixForLocations": true
+    }
+  },
+  "languageserver": {
+    "golang": {
+      "command": "gopls",
+      "rootPatterns": ["go.mod"],
+      "filetypes": ["go"],
+      "settings": {
+    "usePlaceholders": true,
+    "completeUnimported": true
+      }
+    },
+    "python": {
+      "command": "python",
+      "filetypes": ["python"]
+    },
+    "clangd": {
+      "command": "clangd",
+      "args": ["--background-index"],
+      "rootPatterns": ["compile_flags.txt", "compile_commands.json", ".vim/", ".git/", ".hg/"],
+      "filetypes": ["c", "cpp", "objc", "objcpp"]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# "\ek": kill-line                    # alternate mapping of kill line besides Control-k
+# "\eo": kill-line                    # alternate mapping of kill line besides Control-k
+set show-all-if-ambiguous on
+# set editing-mode vi
+# Control-x: vi-movement-mode
+# Esc: vi-movement-mode
+
+$if Bash   # same effect as "bind Space:magic-space" in ~/.bashrc
+  Space: magic-space
+$endif
+
+# set keymap vi-insert
+Control-p: history-search-backward  # search command history backward with up arrow key
+Control-n: history-search-forward   # search command history forward with down arrow key
