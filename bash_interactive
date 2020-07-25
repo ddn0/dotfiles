@@ -20,37 +20,11 @@ fi
 export HISTSIZE=4096
 export HISTCONTROL=erasedups
 export HISTIGNORE=ls:cd
-export VISUAL=$(which vim)
+export VISUAL=vim
 export EDITOR=$VISUAL
 
 # append to the history file, don't overwrite it
 shopt -s histappend
-
-if [[ -n "$TERM_PROGRAM" && "$TERM_PROGRAM" == "Apple_Terminal" ]]; then
-  update_terminal_tab_cwd() {
-      # Identify the directory using a "file:" scheme URL,
-      # including the host name to disambiguate local vs.
-      # remote connections. Percent-escape spaces.
-      local SEARCH=' '
-      local REPLACE='%20'
-      local PWD_ESCAPED="${PWD//$SEARCH/$REPLACE}"
-      printf '\e]0;%s\a' "${PWD_ESCAPED##*/}"
-  }
-  # CMD='echo -n -e "\033]0;$(basename "$PWD")\007"'
-  export PROMPT_COMMAND="update_terminal_tab_cwd; $PROMPT_COMMAND"
-elif [[ -n "$TERM_PROGRAM" ]]; then
-  export PROMPT_COMMAND='echo -ne "\033]0;${PWD##*/}\007"'
-fi
-
-# If we are running in stterm (e.g., i3-wm), set the title to be the currently
-# running command. This will help us use i3-vim. DEBUG fires after each command
-# executes.
-case $TERM in
-  st-*)
-    # The title is the first word in the command.
-    trap 'printf "\033]0;%s\007" "${BASH_COMMAND// */}"' DEBUG
-    ;;
-esac
 
 # check the window size after each command and, if necessary, update the values
 # of LINES and COLUMNS.
