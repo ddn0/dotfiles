@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # If not running interactively, don't do anything
 case $- in
   *i*) ;;
@@ -31,7 +33,7 @@ shopt -s histappend
 shopt -s checkwinsize
 
 function reloadssh() {
-  eval $(tmux show-env -s |grep '^SSH_')
+  eval "$(tmux show-env -s |grep '^SSH_')"
 }
 
 if [ -x /usr/bin/tput ] && tput setaf 1 >& /dev/null; then
