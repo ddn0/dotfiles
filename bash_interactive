@@ -43,4 +43,4 @@ else
 fi
 
 [ -f /opt/conda/etc/profile.d/conda.sh ] && . /opt/conda/etc/profile.d/conda.sh
-[ -f /usr/share/doc/fzf/examples/key-bindings.bash ] && . /usr/share/doc/fzf/examples/key-bindings.bash
+[ -f ~/.fzf.bash ] && . ~/.fzf.bash
