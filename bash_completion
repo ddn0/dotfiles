@@ -1,7 +1,0 @@
-
-load() {
-  file="/usr/share/bash-completion/completions/$1"
-  [ -r "$file" ] && . "$file"
-}
-
-load fzf

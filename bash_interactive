@@ -8,8 +8,7 @@ esac
 
 case `uname` in
   Darwin*)
-    export CLICOLOR=1
-    ;;
+    export CLICOLOR=1 ;;
 esac
 
 if [ -x /usr/bin/dircolors ]; then
@@ -44,3 +43,15 @@ fi
 
 [ -f /opt/conda/etc/profile.d/conda.sh ] && . /opt/conda/etc/profile.d/conda.sh
 [ -f ~/.fzf.bash ] && . ~/.fzf.bash
+
+# On some machines (Ubuntu 18.04), non-login interactive shells do not load
+# bash completions. Load them if not.
+if [ -z "${BASH_COMPLETION_VERSINFO-}" ]; then
+  if ! shopt -oq posix; then
+    if [ -f /usr/share/bash-completion/bash_completion ]; then
+      . /usr/share/bash-completion/bash_completion
+    elif [ -f /etc/bash_completion ]; then
+      . /etc/bash_completion
+    fi
+  fi
+fi

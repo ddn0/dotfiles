@@ -1,7 +1,7 @@
 " Override default python with the one in our path. This allows us to pick
 " up on python virtual environments.
 let g:python_host_prog = exepath("python")
-let g:python3_host_prog = exepath("python")
+let g:python3_host_prog = exepath("python3")
 
 let g:use_black = 0
 if executable("black") && has('nvim')

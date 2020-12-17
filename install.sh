@@ -22,7 +22,6 @@ esac
 mkdir -p $HOME/.vim-data/undo
 mkdir -p $HOME/.vim-data/rcs
 
-update $BASE/bash_completion $HOME/.bash_completion
 update $BASE/bash_interactive $HOME/.bash_interactive
 update $BASE/config/kitty $HOME/.config/kitty
 update $BASE/config/nvim $HOME/.config/nvim
