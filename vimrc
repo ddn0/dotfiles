@@ -8,12 +8,15 @@ if executable("black") && has('nvim')
   let g:use_black = 1
 endif
 
+" polyglot
+let g:polyglot_disabled = ['go', 'python', 'cpp']
+
 call plug#begin('~/.vim/bundle')
 " Plug 'SirVer/ultisnips         " snippets
 Plug 'neoclide/coc.nvim', has('nvim') ? {'branch': 'release', 'do': { -> coc#util#install() } } : { 'on': [] }
 Plug 'chrisbra/unicode.vim'    " unicode
 Plug 'ctrlpvim/ctrlp.vim'      " file browser
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 " Plug 'jlanzarotta/bufexplorer'  " browse buffers
 Plug 'michaeljsmith/vim-indent-object'  " text objects based on indents
 Plug 'junegunn/gv.vim', { 'on': 'GV' }  " git log
@@ -22,6 +25,7 @@ Plug 'christoomey/vim-tmux-navigator'  " tmux integration
 Plug 'melonmanchan/vim-tmux-resizer'   " tmux integration
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 Plug 'sheerun/vim-polyglot'     " general syntax hilighting
+Plug 'tpope/vim-abolish'        " word substitution
 Plug 'tpope/vim-dispatch'       " asynchronous make
 Plug 'tpope/vim-fugitive'       " git commands
 Plug 'tpope/vim-sensible'       " sensible defaults
@@ -72,6 +76,7 @@ set whichwrap=b,s,<,>,[,] " let us move between lines in insert mode
 set wildignorecase
 set wildmode=longest,full  " when doing tab completion act like bash/emacs
 set termguicolors
+set nojoinspaces        " one space after period when joining text lines
 let mapleader="\<space>"
 
 " switch syntax highlighting on, when term has colors
@@ -79,6 +84,8 @@ if &t_Co > 2 || has("gui_running")
   syntax on
   colorscheme eldar
 endif
+
+set comments^="#,"
 
 " enable autospell check
 autocmd filetype tex setlocal spell spelllang=en_us
@@ -88,7 +95,7 @@ autocmd filetype gitcommit setlocal spell textwidth=72
 " disable spellcheck for CMakeLists.txt
 autocmd filetype cmake setlocal nospell
 
-autocmd Filetype c,cpp,h,hpp set comments^=:///
+autocmd Filetype c,cpp,h,hpp set comments^="///,"
 
 " automatically jump to mark when file is opened
 autocmd BufReadPost *
@@ -172,18 +179,8 @@ let NERDTreeWinPos = 'right'
 let g:ctrlp_cmd = 'CtrlPMixed'
 let g:ctrlp_working_path_mode = 'ra'
 
-" polyglot
-let g:polyglot_disabled = ['go', 'python', 'cpp']
-
-" vim-go
-let g:go_def_mapping_enabled = 0
-" Hack while we have a custom goimport
-let g:go_metalinter_enabled = ['vet', 'gosec', 'golint', 'errcheck', 'deadcode', 'ineffassign', 'megacheck']
-let g:go_metalinter_deadline = '30s'
-"let g:go_metalinter_commmand = '--enable-all --deadline=1m'
-au FileType go nnoremap <buffer> <leader>bb :GoTestCompile<CR>
-au FileType go nnoremap <buffer> <leader>bl :GoMetaLinter<CR>
-au FileType go setlocal noexpandtab shiftwidth=4 tabstop=4 softtabstop=0 textwidth=80
+" go
+autocmd FileType go setlocal noexpandtab shiftwidth=4 tabstop=4 softtabstop=0 textwidth=80
 
 " python
 if g:use_black

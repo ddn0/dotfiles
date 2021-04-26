@@ -1,22 +1,82 @@
 {
   "coc":{
     "preferences": {
-      "useQuickfixForLocations": true
+      "useQuickfixForLocations": true,
+      "formatOnSaveFiletypes" : ["cpp", "go" ]
     }
   },
   "languageserver": {
     "golang": {
       "command": "gopls",
-      "rootPatterns": ["go.mod"],
+      "rootPatterns": ["go.mod", ".git"],
       "filetypes": ["go"],
       "settings": {
-    "usePlaceholders": true,
-    "completeUnimported": true
+        "usePlaceholders": true,
+        "completeUnimported": true
       }
     },
     "python": {
-      "command": "python",
-      "filetypes": ["python"]
+      "command": "python3",
+      "args": [
+        "-mpyls"
+      ],
+      "filetypes": [
+        "python"
+      ],
+      "settings": {
+        "pyls": {
+          "enable": true,
+          "trace": {
+            "server": "verbose"
+          },
+          "commandPath": "",
+          "configurationSources": [
+            "pycodestyle"
+          ],
+          "plugins": {
+            "jedi_completion": {
+              "enabled": true
+            },
+            "jedi_hover": {
+              "enabled": true
+            },
+            "jedi_references": {
+              "enabled": true
+            },
+            "jedi_signature_help": {
+              "enabled": true
+            },
+            "jedi_symbols": {
+              "enabled": true,
+              "all_scopes": true
+            },
+            "mccabe": {
+              "enabled": true,
+              "threshold": 15
+            },
+            "preload": {
+              "enabled": true
+            },
+            "pycodestyle": {
+              "enabled": true
+            },
+            "pydocstyle": {
+              "enabled": false,
+              "match": "(?!test_).*\\.py",
+              "matchDir": "[^\\.].*"
+            },
+            "pyflakes": {
+              "enabled": true
+            },
+            "rope_completion": {
+              "enabled": true
+            },
+            "yapf": {
+              "enabled": true
+            }
+          }
+        }
+      }
     },
     "clangd": {
       "command": "clangd",
