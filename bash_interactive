@@ -23,6 +23,7 @@ export HISTCONTROL=erasedups
 export HISTIGNORE=ls:cd
 export VISUAL=vim
 export EDITOR=$VISUAL
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -43,6 +44,7 @@ fi
 
 [ -f /opt/conda/etc/profile.d/conda.sh ] && . /opt/conda/etc/profile.d/conda.sh
 [ -f ~/.fzf.bash ] && . ~/.fzf.bash
+[ -f ~/.asdf/asdf.sh ] && . ~/.asdf/asdf.sh
 
 # On some machines (Ubuntu 18.04), non-login interactive shells do not load
 # bash completions. Load them if not.

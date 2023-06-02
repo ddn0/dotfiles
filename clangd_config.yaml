@@ -1,0 +1,7 @@
+CompileFlags:
+  Remove:
+  - --target=x86_64-conda-linux-gnu
+  - -march=*
+  - -mtune=*
+  Add:
+  - --triple=x86-64-unknown-linux-gnu

@@ -1,10 +1,7 @@
 {
-  "coc":{
-    "preferences": {
-      "useQuickfixForLocations": true,
-      "formatOnSaveFiletypes" : ["cpp", "go" ]
-    }
-  },
+  "suggest.noselect": true,
+  "coc.preferences.useQuickfixForLocations": true,
+  "coc.preferences.formatOnSaveFiletypes" : ["cpp", "go" ],
   "languageserver": {
     "golang": {
       "command": "gopls",
@@ -58,7 +55,13 @@
               "enabled": true
             },
             "pycodestyle": {
-              "enabled": true
+              "enabled": false
+            },
+            "pylint": {
+              "enabled": true,
+              "args": [
+                "--rcfile=/home/ddn/w/katana/pyproject.toml"
+              ]
             },
             "pydocstyle": {
               "enabled": false,
@@ -77,12 +80,6 @@
           }
         }
       }
-    },
-    "clangd": {
-      "command": "clangd",
-      "args": ["--background-index"],
-      "rootPatterns": ["compile_flags.txt", "compile_commands.json", ".vim/", ".git/", ".hg/"],
-      "filetypes": ["c", "cpp", "objc", "objcpp"]
     }
   }
 }

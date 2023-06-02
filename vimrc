@@ -3,24 +3,23 @@
 let g:python_host_prog = exepath("python")
 let g:python3_host_prog = exepath("python3")
 
-let g:use_black = 0
-if executable("black") && has('nvim')
-  let g:use_black = 1
-endif
+let g:coc_disable_startup_warning = 1
 
 " polyglot
 let g:polyglot_disabled = ['go', 'python', 'cpp']
 
 call plug#begin('~/.vim/bundle')
 " Plug 'SirVer/ultisnips         " snippets
-Plug 'neoclide/coc.nvim', has('nvim') ? {'branch': 'release', 'do': { -> coc#util#install() } } : { 'on': [] }
+Plug 'neoclide/coc.nvim', has('nvim') ? {'branch': 'release' } : { 'on': [] }
 Plug 'chrisbra/unicode.vim'    " unicode
 Plug 'ctrlpvim/ctrlp.vim'      " file browser
+Plug 'tacahiroy/ctrlp-funky'   " ctrlp with symbols
 " Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 " Plug 'jlanzarotta/bufexplorer'  " browse buffers
 Plug 'michaeljsmith/vim-indent-object'  " text objects based on indents
-Plug 'junegunn/gv.vim', { 'on': 'GV' }  " git log
+" Plug 'junegunn/gv.vim', { 'on': 'GV' }  " git log
 Plug 'majutsushi/tagbar', { 'on': 'Tagbar' }  " browse symbols
+Plug 'liuchengxu/vista.vim', { 'on': 'Vista' }
 Plug 'christoomey/vim-tmux-navigator'  " tmux integration
 Plug 'melonmanchan/vim-tmux-resizer'   " tmux integration
 Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
@@ -32,7 +31,7 @@ Plug 'tpope/vim-sensible'       " sensible defaults
 Plug 'tpope/vim-unimpaired'     " paired commands
 Plug 'tpope/vim-rhubarb'        " github integration
 Plug 'vim-scripts/rcsvers.vim'  " backups
-Plug 'python/black', g:use_black ? {'tag': '19.10b0' } : { 'on': [] }
+Plug 'python/black', {'tag': '19.10b0' }
 Plug 'jpalardy/vim-slime'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -64,6 +63,7 @@ set shortmess+=I        " disable startup messge
 set shortmess+=c        " disable ins-completion-menu messages
 set showmatch
 set smartcase           " case sensitive search if term is mixed case
+set signcolumn=yes      " always show signcolumn otherwise text shifts on load
 set ttimeout
 set ttimeoutlen=50
 set ttyfast
@@ -82,7 +82,9 @@ let mapleader="\<space>"
 " switch syntax highlighting on, when term has colors
 if &t_Co > 2 || has("gui_running")
   syntax on
-  colorscheme eldar
+  colorscheme torte
+  highlight Pmenu ctermbg=gray guibg=gray
+  highlight CocErrorSign ctermfg=DarkRed cterm=bold guifg=DarkRed gui=bold
 endif
 
 set comments^="#,"
@@ -95,7 +97,7 @@ autocmd filetype gitcommit setlocal spell textwidth=72
 " disable spellcheck for CMakeLists.txt
 autocmd filetype cmake setlocal nospell
 
-autocmd Filetype c,cpp,h,hpp set comments^="///,"
+autocmd Filetype c,cpp,h,hpp set comments=sO:*\ -,mO:*\ \ ,exO:*/,s1:/*,mb:*,ex:*/,bO:///,O://
 
 " automatically jump to mark when file is opened
 autocmd BufReadPost *
@@ -117,52 +119,42 @@ autocmd BufReadPost quickfix set modifiable
 " ******************************************
 
 " coc
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
-function! s:check_back_space() abort
+function! CheckBackSpace() abort
   let col = col('.') - 1
-  return !col || getline('.')[col - 1]  =~# '\s'
+  return !col || getline('.')[col - 1]  =~ '\s'
 endfunction
 
-" Use <c-space> for trigger completion.
-inoremap <silent><expr> <c-space> coc#refresh()
+" Insert <tab> when previous text is space, refresh completion if not.
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#pum#next(1):
+      \ CheckBackSpace() ? "\<Tab>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
 
-" Use <cr> for confirm completion, `<C-g>u` means break undo chain at current
-" position.  Coc only does snippet and additional edit on confirm.
-inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
-
-autocmd InsertLeave * if pumvisible() == 0 | pclose | endif
+" Make <CR> to accept selected completion item or notify coc.nvim to format
+" <C-g>u breaks current undo, please make your own choice
+inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm()
+                              \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
 
 " Remap keys for gotos
 nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gt <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
+nmap <silent> gn <Plug>(coc-rename)
+nmap <silent> ga <Plug>(coc-codeaction)
+nmap <silent> gf <Plug>(coc-fix-current)
 
-" Use K for show documentation in preview window
-nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-" Remap for do codeAction of current line
-nmap <leader>ga <Plug>(coc-codeaction)
-" Fix autofix problem of current line
-nmap <leader>gf <Plug>(coc-fix-current)
-
-function! s:show_documentation()
-  if &filetype == 'vim'
-    execute 'h '.expand('<cword>')
+function! ShowDocumentation()
+  if CocAction('hasProvider', 'hover')
+    call CocActionAsync('doHover')
   else
-    call CocAction('doHover')
+    call feedkeys('K', 'in')
   endif
 endfunction
 
-augroup coc
-  " Setup formatexpr specified filetype(s).
-  " autocmd FileType typescript,python,json setlocal formatexpr=CocAction('formatSelected')
-augroup end
+" Use K for show documentation in preview window
+nnoremap <silent> K :call ShowDocumentation()<CR>
 
 " rcsvers.vim
 " save RCS files to a common directory
@@ -183,9 +175,9 @@ let g:ctrlp_working_path_mode = 'ra'
 autocmd FileType go setlocal noexpandtab shiftwidth=4 tabstop=4 softtabstop=0 textwidth=80
 
 " python
-if g:use_black
-  let g:black_linelength = 100
-endif
+" set line length manually because vim-black does not read from pyproject.toml
+" like cli-black does.
+let g:black_linelength = 120
 
 " tagbar + vim-go
 let g:tagbar_type_go = {

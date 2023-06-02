@@ -22,7 +22,9 @@ esac
 mkdir -p $HOME/.vim-data/undo
 mkdir -p $HOME/.vim-data/rcs
 
+update $BASE/agignore $HOME/.agignore
 update $BASE/bash_interactive $HOME/.bash_interactive
+update $BASE/clangd_config.yaml $HOME/.config/clangd/config.yaml
 update $BASE/config/kitty $HOME/.config/kitty
 update $BASE/config/nvim $HOME/.config/nvim
 update $BASE/fonts $HOME/.fonts
