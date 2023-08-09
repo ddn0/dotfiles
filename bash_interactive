@@ -50,10 +50,11 @@ fi
 # bash completions. Load them if not.
 if [ -z "${BASH_COMPLETION_VERSINFO-}" ]; then
   if ! shopt -oq posix; then
-    if [ -f /usr/share/bash-completion/bash_completion ]; then
-      . /usr/share/bash-completion/bash_completion
-    elif [ -f /etc/bash_completion ]; then
-      . /etc/bash_completion
-    fi
+    for candidate in /usr/share/bash-completion/bash_completion /usr/local/etc/bash_completion /etc/bash_completion; do
+      if [ -f "$candidate" ]; then
+        . "$candidate"
+        break
+      fi
+    done
   fi
 fi

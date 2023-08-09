@@ -3,7 +3,7 @@
   email = ddn0@users.noreply.github.com
 
 [credential]
-  helper = libsecret
+  helper = /usr/local/share/gcm-core/git-credential-manager
 
 [alias]
   l = log --graph --pretty=format:'%C(auto,yellow)%h%Creset%C(auto,blue)%d%Creset %C(auto,normal)%s%Creset %C(auto,normal dim)(%ar)%Creset'
@@ -21,5 +21,12 @@
 [rerere]
   enabled = true
   autoupdate = true
+
 [init]
-	defaultBranch = main
+  defaultBranch = main
+
+[credential "https://dev.azure.com"]
+  useHttpPath = true
+
+[credential "https://huggingface.co"]
+  provider = generic
