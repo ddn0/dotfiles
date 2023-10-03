@@ -46,6 +46,16 @@ fi
 [ -f ~/.fzf.bash ] && . ~/.fzf.bash
 [ -f ~/.asdf/asdf.sh ] && . ~/.asdf/asdf.sh
 
+# subshells interfere with vim-tmux-navigator:
+#
+#   https://github.com/christoomey/vim-tmux-navigator/issues/195
+#
+# Since supporting arbitrary subshell nested is broken, provide an alias to
+# avoid creating a subshell for virtual environments instead
+if which poetry > /dev/null; then
+  alias poetry_activate='source $(poetry env info --path)/bin/activate'
+fi
+
 # On some machines (Ubuntu 18.04), non-login interactive shells do not load
 # bash completions. Load them if not.
 if [ -z "${BASH_COMPLETION_VERSINFO-}" ]; then
