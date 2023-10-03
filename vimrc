@@ -188,8 +188,8 @@ autocmd FileType go setlocal noexpandtab shiftwidth=4 tabstop=4 softtabstop=0 te
 " js/ts
 " ------------------------------------------
 autocmd FileType javascript,typescript,svelte setlocal
-      \  noexpandtab shiftwidth=2 tabstop=2 softtabstop=0 textwidth=80
-autocmd FileType javascript,typescript,svelte setlocal makeprg=npm\ run\ check
+      \  noexpandtab shiftwidth=2 tabstop=2 softtabstop=0 textwidth=120
+autocmd FileType javascript,typescript,svelte setlocal makeprg=npm\ run\ $*
 " Decoding errorformat:
 "   %E          begin multiline error message
 "    %f:%l:%c   filename:line:col
