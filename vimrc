@@ -276,7 +276,9 @@ cmp.setup({
       vim.fn["vsnip#anonymous"](args.body)
     end,
   },
-  view = "custom",
+  completion = {
+    -- autocomplete = false,
+  },
   window = {
     -- completion = cmp.config.window.bordered(),
     -- documentation = cmp.config.window.bordered(),
@@ -347,6 +349,12 @@ require'lspconfig'.pyright.setup{
   on_init = function(client)
       client.config.settings.python.pythonPath = get_python_path(client.config.root_dir)
   end,
+}
+require'lspconfig'.rust_analyzer.setup{
+  capabilities = capabilities
+}
+require('lspconfig').ruff_lsp.setup {
+  on_attach = on_attach,
 }
 
 -- ----------------------------------------
