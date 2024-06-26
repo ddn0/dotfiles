@@ -21,10 +21,16 @@ fi
 export HISTSIZE=4096
 export HISTCONTROL=erasedups
 export HISTIGNORE=ls:cd
+
 export VISUAL=vim
 export EDITOR=$VISUAL
+
 export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
 export PYTHONDONTWRITEBYTECODE=1
+
+export FZF_DEFAULT_COMMAND="rg --files"
+export FZF_CTRL_T_COMMAND="rg --files"
 
 # append to the history file, don't overwrite it
 shopt -s histappend
@@ -43,9 +49,9 @@ else
   export PS1='\u@\h:\W\$ '
 fi
 
-[ -f /opt/conda/etc/profile.d/conda.sh ] && . /opt/conda/etc/profile.d/conda.sh
 [ -f ~/.fzf.bash ] && . ~/.fzf.bash
-[ -f ~/.asdf/asdf.sh ] && . ~/.asdf/asdf.sh
+[ -f ~/.cargo/env ] && . ~/.cargo/env
+[ -f /usr/local/share/google-cloud-sdk/path.bash.inc ] && . /usr/local/share/google-cloud-sdk/path.bash.inc
 
 # subshells interfere with vim-tmux-navigator:
 #
@@ -98,3 +104,28 @@ _gt_yargs_completions()
 }
 complete -o bashdefault -o default -F _gt_yargs_completions gt
 ###-end-gt-completions-###
+
+_check_completion() {
+    local IFS=$'\n'
+    local response
+
+    response=$(env COMP_WORDS="${COMP_WORDS[*]}" COMP_CWORD=$COMP_CWORD _CHECK_COMPLETE=bash_complete $1)
+
+    for completion in $response; do
+        IFS=',' read type value <<< "$completion"
+
+        if [[ $type == 'dir' ]]; then
+            COMPREPLY=()
+            compopt -o dirnames
+        elif [[ $type == 'file' ]]; then
+            COMPREPLY=()
+            compopt -o default
+        elif [[ $type == 'plain' ]]; then
+            COMPREPLY+=($value)
+        fi
+    done
+
+    return 0
+}
+complete -o nosort -F _check_completion check
+
