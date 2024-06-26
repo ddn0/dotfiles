@@ -9,11 +9,9 @@
   l = log --graph --pretty=format:'%C(auto,yellow)%h%Creset%C(auto,blue)%d%Creset %C(auto,normal)%s%Creset %C(auto,normal dim)(%ar)%Creset'
   ll = !git l --all
   ls = !git ll --simplify-by-decoration
-  co = checkout
   d = diff --stat
   dd = diff
   s = status
-  ss = status --untracked-files=no
 
 [push]
   default = simple
