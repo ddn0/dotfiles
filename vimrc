@@ -187,15 +187,15 @@ autocmd FileType go setlocal noexpandtab shiftwidth=4 tabstop=4 softtabstop=0 te
 " ------------------------------------------
 " js/ts
 " ------------------------------------------
-autocmd FileType javascript,typescript,svelte setlocal
+autocmd FileType javascript,typescript,svelte,typescriptreact setlocal
       \  noexpandtab shiftwidth=2 tabstop=2 softtabstop=0 textwidth=120
-autocmd FileType javascript,typescript,svelte setlocal makeprg=npm\ run\ $*
+autocmd FileType javascript,typescript,svelte,typescriptreact setlocal makeprg=npm\ run\ $*
 " Decoding errorformat:
 "   %E          begin multiline error message
 "    %f:%l:%c   filename:line:col
 "    ,%Z        continuation of multiline error message
 "    %m         message
-autocmd FileType javascript,typescript,svelte setlocal errorformat=%E%f:%l:%c,%Z%m
+autocmd FileType javascript,typescript,svelte,typescriptreact setlocal errorformat=%E%f:%l:%c,%Z%m
 
 " ------------------------------------------
 " vista
@@ -336,16 +336,22 @@ cmp.setup.cmdline({ '/', '?' }, {
 -- ----------------------------------------
 -- lspconfig
 -- ----------------------------------------
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
 require'lspconfig'.tsserver.setup{
-  capabilities = capabilities
+-- https://github.com/neovim/neovim/issues/26483#issuecomment-1848332363
+-- capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
+  capabilities = capabilities,
+  --on_init = function(client)
+  --  client.workspace.didChangeWatchedFiles.dynamicRegistration = false
+  --end,
 }
 require'lspconfig'.svelte.setup{
   capabilities = capabilities
 }
 require'lspconfig'.pyright.setup{
-  capabilities = capabilities,
+  --capabilities = capabilities,
   on_init = function(client)
       client.config.settings.python.pythonPath = get_python_path(client.config.root_dir)
   end,
@@ -355,6 +361,34 @@ require'lspconfig'.rust_analyzer.setup{
 }
 require('lspconfig').ruff_lsp.setup {
   on_attach = on_attach,
+}
+require'lspconfig'.eslint.setup{
+  capabilities = capabilities
+}
+
+require'lspconfig'.lua_ls.setup{
+  --capabilities = capabilities,
+  settings = {
+    Lua = {
+      runtime = { version = 'LuaJIT' },
+      workspace = {
+        checkThirdParty = false,
+        -- Tells lua_ls where to find all the Lua files that you have loaded
+        -- for your neovim configuration.
+        library = {
+          '${3rd}/luv/library',
+          unpack(vim.api.nvim_get_runtime_file('', true)),
+        },
+        -- If lua_ls is really slow on your computer, you can try this instead:
+        -- library = { vim.env.VIMRUNTIME },
+      },
+      completion = {
+        callSnippet = 'Replace',
+      },
+      -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+      -- diagnostics = { disable = { 'missing-fields' } },
+    },
+  },
 }
 
 -- ----------------------------------------
@@ -421,6 +455,23 @@ vim.api.nvim_create_autocmd('LspAttach', {
     vim.keymap.set('n', '<space>cf', function()
       vim.lsp.buf.format { async = true }
     end, opts)
+    -- The following two autocommands are used to highlight references of the
+    -- word under your cursor when your cursor rests there for a little while.
+    --    See `:help CursorHold` for information about when this is executed
+    --
+    -- When you move your cursor, the highlights will be cleared (the second autocommand).
+    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+    if client and client.server_capabilities.documentHighlightProvider then
+      vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
+        buffer = ev.buf,
+        callback = vim.lsp.buf.document_highlight,
+      })
+
+      vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
+        buffer = ev.buf,
+        callback = vim.lsp.buf.clear_references,
+      })
+    end
   end,
 })
 EOF
