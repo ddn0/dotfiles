@@ -2,9 +2,6 @@
   name = Donald Nguyen
   email = ddn0@users.noreply.github.com
 
-[credential]
-  helper = /usr/local/share/gcm-core/git-credential-manager
-
 [alias]
   l = log --graph --pretty=format:'%C(auto,yellow)%h%Creset%C(auto,blue)%d%Creset %C(auto,normal)%s%Creset %C(auto,normal dim)(%ar)%Creset'
   ll = !git l --all
@@ -23,8 +20,8 @@
 [init]
   defaultBranch = main
 
-[credential "https://dev.azure.com"]
-  useHttpPath = true
+[credential]
+	helper = /usr/local/share/gcm-core/git-credential-manager
 
-[credential "https://huggingface.co"]
-  provider = generic
+[credential "https://dev.azure.com"]
+	useHttpPath = true

@@ -1,8 +1,3 @@
-" Override default python with the one in our path. This allows us to pick
-" up on python virtual environments.
-"let g:python_host_prog = exepath("python")
-"let g:python3_host_prog = exepath("python3")
-
 call plug#begin('~/.vim/bundle')
 Plug 'neovim/nvim-lspconfig'
 Plug 'chrisbra/unicode.vim'    " unicode
@@ -185,6 +180,11 @@ let NERDTreeWinPos = 'right'
 autocmd FileType go setlocal noexpandtab shiftwidth=4 tabstop=4 softtabstop=0 textwidth=80
 
 " ------------------------------------------
+" python
+" ------------------------------------------
+autocmd FileType python setlocal makeprg=pyright nospell
+
+" ------------------------------------------
 " js/ts
 " ------------------------------------------
 autocmd FileType javascript,typescript,svelte,typescriptreact setlocal
@@ -211,7 +211,7 @@ let g:vista_executive_for = {
 " fzf
 " ------------------------------------------
 nmap <Leader>fb :Buffers<CR>
-nmap <Leader>fl :Lines<CR>
+nmap <Leader>fg :GF?<CR>
 nmap <Leader>fr :RG<CR>
 nmap <Leader>ff :Files<CR>
 nmap <Leader>fv :Vista finder fzf:nvim_lsp<CR>
@@ -227,6 +227,23 @@ let g:fzf_action = {
   \ 'ctrl-t': 'tab split',
   \ 'ctrl-x': 'split',
   \ 'ctrl-v': 'vsplit' }
+
+function! s:list_buffers()
+  redir => list
+  silent ls
+  redir END
+  return split(list, "\n")
+endfunction
+
+function! s:delete_buffers(lines)
+  execute 'bwipeout' join(map(a:lines, {_, line -> split(line)[0]}))
+endfunction
+
+command! BD call fzf#run(fzf#wrap({
+  \ 'source': s:list_buffers(),
+  \ 'sink*': { lines -> s:delete_buffers(lines) },
+  \ 'options': '--multi --reverse --bind ctrl-a:select-all+accept'
+\ }))
 
 " ------------------------------------------
 " vim-slime
@@ -339,7 +356,7 @@ cmp.setup.cmdline({ '/', '?' }, {
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
-require'lspconfig'.tsserver.setup{
+require'lspconfig'.ts_ls.setup{
 -- https://github.com/neovim/neovim/issues/26483#issuecomment-1848332363
 -- capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
   capabilities = capabilities,
@@ -359,7 +376,7 @@ require'lspconfig'.pyright.setup{
 require'lspconfig'.rust_analyzer.setup{
   capabilities = capabilities
 }
-require('lspconfig').ruff_lsp.setup {
+require('lspconfig').ruff.setup {
   on_attach = on_attach,
 }
 require'lspconfig'.eslint.setup{
