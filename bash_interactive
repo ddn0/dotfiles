@@ -8,7 +8,9 @@ esac
 
 case `uname` in
   Darwin*)
-    export CLICOLOR=1 ;;
+    export CLICOLOR=1
+    export BASH_SILENCE_DEPRECATION_WARNING=1
+    ;;
 esac
 
 if [ -x /usr/bin/dircolors ]; then
@@ -127,5 +129,5 @@ _check_completion() {
 
     return 0
 }
-complete -o nosort -F _check_completion check
+complete -F _check_completion check
 

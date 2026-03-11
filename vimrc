@@ -12,12 +12,12 @@ Plug 'tpope/vim-fugitive'       " git commands
 Plug 'tpope/vim-sensible'       " sensible defaults
 Plug 'tpope/vim-unimpaired'     " paired commands
 Plug 'tpope/vim-rhubarb'        " github integration
+Plug 'tpope/vim-eunuch'         " shell commands
 Plug 'vim-scripts/rcsvers.vim'  " backups
 Plug 'jpalardy/vim-slime'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'         " search everywhere
 Plug 'agude/vim-eldar'          " color theme
-Plug 'leafOfTree/vim-svelte-plugin'
 
 " organized lsp diagnostics
 Plug 'folke/trouble.nvim', has('nvim') ? { }: { 'on': [] }
@@ -156,8 +156,6 @@ xmap        S   <Plug>(vsnip-cut-text)
 
 " If you want to use snippet for multiple filetypes, you can `g:vsnip_filetypes` for it.
 let g:vsnip_filetypes = {}
-let g:vsnip_filetypes.svelte = ['javascript']
-let g:vsnip_filetypes.svelte = ['typescript']
 
 " ------------------------------------------
 " rcsvers.vim
@@ -187,15 +185,16 @@ autocmd FileType python setlocal makeprg=pyright nospell
 " ------------------------------------------
 " js/ts
 " ------------------------------------------
-autocmd FileType javascript,typescript,svelte,typescriptreact setlocal
+autocmd FileType javascript,typescript,typescriptreact setlocal
       \  noexpandtab shiftwidth=2 tabstop=2 softtabstop=0 textwidth=120
-autocmd FileType javascript,typescript,svelte,typescriptreact setlocal makeprg=npm\ run\ $*
+autocmd FileType javascript,typescript,typescriptreact compiler tsc | setlocal makeprg=npx\ tsc\ --pretty\ false
+
 " Decoding errorformat:
 "   %E          begin multiline error message
 "    %f:%l:%c   filename:line:col
 "    ,%Z        continuation of multiline error message
 "    %m         message
-autocmd FileType javascript,typescript,svelte,typescriptreact setlocal errorformat=%E%f:%l:%c,%Z%m
+"autocmd FileType javascript,typescript,typescriptreact setlocal errorformat=%E%f:%l:%c,%Z%m
 
 " ------------------------------------------
 " vista
@@ -203,7 +202,6 @@ autocmd FileType javascript,typescript,svelte,typescriptreact setlocal errorform
 let g:vista_default_executive = 'nvim_lsp'
 let g:vista_fzf_preview = ['right:50%']
 let g:vista_executive_for = {
-  \ 'svelte': 'nvim_lsp',
   \ 'ts': 'nvim_lsp',
   \ }
 
@@ -215,6 +213,7 @@ nmap <Leader>fg :GF?<CR>
 nmap <Leader>fr :RG<CR>
 nmap <Leader>ff :Files<CR>
 nmap <Leader>fv :Vista finder fzf:nvim_lsp<CR>
+nnoremap F :Rg <C-R><C-W><CR>
 
 function! s:build_quickfix_list(lines)
   call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
@@ -354,64 +353,87 @@ cmp.setup.cmdline({ '/', '?' }, {
 -- lspconfig
 -- ----------------------------------------
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+-- capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
-require'lspconfig'.ts_ls.setup{
--- https://github.com/neovim/neovim/issues/26483#issuecomment-1848332363
--- capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
-  capabilities = capabilities,
-  --on_init = function(client)
-  --  client.workspace.didChangeWatchedFiles.dynamicRegistration = false
-  --end,
-}
-require'lspconfig'.svelte.setup{
-  capabilities = capabilities
-}
-require'lspconfig'.pyright.setup{
-  --capabilities = capabilities,
+vim.lsp.enable('ts_ls')
+vim.lsp.enable('rust_analyzer')
+vim.lsp.enable('ruff')
+vim.lsp.enable('eslint')
+vim.lsp.config('biome',  {
+  cmd = { 'npx', 'biome', 'lsp-proxy' }
+})
+vim.lsp.enable('biome')
+vim.lsp.enable('gopls')
+
+vim.lsp.config('pyright',  {
   on_init = function(client)
       client.config.settings.python.pythonPath = get_python_path(client.config.root_dir)
   end,
-}
-require'lspconfig'.rust_analyzer.setup{
-  capabilities = capabilities
-}
-require('lspconfig').ruff.setup {
-  on_attach = on_attach,
-}
-require'lspconfig'.eslint.setup{
-  capabilities = capabilities
-}
+})
+vim.lsp.enable('pyright')
 
-require'lspconfig'.lua_ls.setup{
-  --capabilities = capabilities,
-  settings = {
-    Lua = {
-      runtime = { version = 'LuaJIT' },
-      workspace = {
-        checkThirdParty = false,
-        -- Tells lua_ls where to find all the Lua files that you have loaded
-        -- for your neovim configuration.
-        library = {
-          '${3rd}/luv/library',
-          unpack(vim.api.nvim_get_runtime_file('', true)),
-        },
-        -- If lua_ls is really slow on your computer, you can try this instead:
-        -- library = { vim.env.VIMRUNTIME },
-      },
-      completion = {
-        callSnippet = 'Replace',
-      },
-      -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-      -- diagnostics = { disable = { 'missing-fields' } },
-    },
-  },
-}
+-- vim.lsp.config('pyrefly', {
+--     -- example of how to run `uv` installed Pyrefly without adding to your path
+--     cmd = { 'uvx', 'pyrefly', 'lsp' }
+-- })
+-- vim.lsp.enable('pyrefly')
+
+-- require('lspconfig').ts_ls.setup{
+-- -- https://github.com/neovim/neovim/issues/26483#issuecomment-1848332363
+-- -- capabilities.workspace.didChangeWatchedFiles.dynamicRegistration = false
+--   capabilities = capabilities,
+--   --on_init = function(client)
+--   --  client.workspace.didChangeWatchedFiles.dynamicRegistration = false
+--   --end,
+-- }
+-- require('lspconfig').pyright.setup{
+--   capabilities = capabilities,
+--   on_init = function(client)
+--       client.config.settings.python.pythonPath = get_python_path(client.config.root_dir)
+--   end,
+-- }
+-- require('lspconfig').rust_analyzer.setup{
+--   capabilities = capabilities
+-- }
+-- require('lspconfig').ruff.setup {
+--   on_attach = on_attach,
+-- }
+-- require('lspconfig').eslint.setup{
+--   capabilities = capabilities
+-- }
+-- require('lspconfig').biome.setup {
+--   capabilities = capabilities
+-- }
+-- 
+-- require('lspconfig').lua_ls.setup{
+--   --capabilities = capabilities,
+--   settings = {
+--     Lua = {
+--       runtime = { version = 'LuaJIT' },
+--       workspace = {
+--         checkThirdParty = false,
+--         -- Tells lua_ls where to find all the Lua files that you have loaded
+--         -- for your neovim configuration.
+--         library = {
+--           '${3rd}/luv/library',
+--           unpack(vim.api.nvim_get_runtime_file('', true)),
+--         },
+--         -- If lua_ls is really slow on your computer, you can try this instead:
+--         -- library = { vim.env.VIMRUNTIME },
+--       },
+--       completion = {
+--         callSnippet = 'Replace',
+--       },
+--       -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+--       -- diagnostics = { disable = { 'missing-fields' } },
+--     },
+--   },
+-- }
 
 -- ----------------------------------------
 -- Trouble
 -- ----------------------------------------
-require'Trouble'.setup{
+require('Trouble').setup{
     icons = false,
     fold_open = "v", -- icon used for open folds
     fold_closed = ">", -- icon used for closed folds
@@ -457,13 +479,13 @@ vim.api.nvim_create_autocmd('LspAttach', {
     -- Buffer local mappings.
     -- See `:help vim.lsp.*` for documentation on any of the below functions
     local opts = { buffer = ev.buf }
-    vim.keymap.set('n', 'gd', vim.lsp.buf.declaration, opts)
-    vim.keymap.set('n', 'gt', vim.lsp.buf.definition, opts)
-    vim.keymap.set('n', 'gT', vim.lsp.buf.type_definition, opts)
+    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'gtd', vim.lsp.buf.type_definition, opts)
     vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
     vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
     vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-    --vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
+    vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, opts)
     --vim.keymap.set('n', 'KK', vim.lsp.buf.signature_help, opts)
     --vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, opts)
     --vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, opts)
